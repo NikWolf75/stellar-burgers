@@ -1,67 +1,83 @@
-import { useState, useRef, useEffect, FC } from 'react';
+import { FC, useState, useRef, useEffect, useMemo } from 'react';
 import { useInView } from 'react-intersection-observer';
+
+import { useDispatch, useSelector } from '../../services/store';
+import { fetchIngredients, getIngredients } from '../../services/slices/ingredientsSlice';
 
 import { TTabMode } from '@utils-types';
 import { BurgerIngredientsUI } from '../ui/burger-ingredients';
 
 export const BurgerIngredients: FC = () => {
-  /** TODO: взять переменные из стора */
-  const buns = [];
-  const mains = [];
-  const sauces = [];
+  const dispatch = useDispatch();
+  const allIngredients = useSelector(getIngredients);
 
-  const [currentTab, setCurrentTab] = useState<TTabMode>('bun');
-  const titleBunRef = useRef<HTMLHeadingElement>(null);
-  const titleMainRef = useRef<HTMLHeadingElement>(null);
-  const titleSaucesRef = useRef<HTMLHeadingElement>(null);
-
-  const [bunsRef, inViewBuns] = useInView({
-    threshold: 0
-  });
-
-  const [mainsRef, inViewFilling] = useInView({
-    threshold: 0
-  });
-
-  const [saucesRef, inViewSauces] = useInView({
-    threshold: 0
-  });
-
+  // подгрузка ингредиентов
   useEffect(() => {
-    if (inViewBuns) {
-      setCurrentTab('bun');
-    } else if (inViewSauces) {
-      setCurrentTab('sauce');
-    } else if (inViewFilling) {
-      setCurrentTab('main');
+    if (allIngredients.length === 0) {
+      dispatch(fetchIngredients());
     }
-  }, [inViewBuns, inViewFilling, inViewSauces]);
+  }, [allIngredients.length, dispatch]);
 
-  const onTabClick = (tab: string) => {
-    setCurrentTab(tab as TTabMode);
-    if (tab === 'bun')
-      titleBunRef.current?.scrollIntoView({ behavior: 'smooth' });
-    if (tab === 'main')
-      titleMainRef.current?.scrollIntoView({ behavior: 'smooth' });
-    if (tab === 'sauce')
-      titleSaucesRef.current?.scrollIntoView({ behavior: 'smooth' });
+  // фильтрация ингредиентов
+  const buns = useMemo(
+    () => allIngredients.filter((el) => el.type === 'bun'),
+    [allIngredients]
+  );
+  const fillings = useMemo(
+    () => allIngredients.filter((el) => el.type === 'main'),
+    [allIngredients]
+  );
+  const sauces = useMemo(
+    () => allIngredients.filter((el) => el.type === 'sauce'),
+    [allIngredients]
+  );
+
+  // состояние активного таба
+  const [activeTab, setActiveTab] = useState<TTabMode>('bun');
+
+  // ссылки на заголовки
+  const bunHeaderRef = useRef<HTMLHeadingElement>(null);
+  const mainHeaderRef = useRef<HTMLHeadingElement>(null);
+  const sauceHeaderRef = useRef<HTMLHeadingElement>(null);
+
+  // observer для секций
+  const [bunSectionRef, bunInView] = useInView({ threshold: 0 });
+  const [mainSectionRef, mainInView] = useInView({ threshold: 0 });
+  const [sauceSectionRef, sauceInView] = useInView({ threshold: 0 });
+
+  // переключение табов при скролле
+  useEffect(() => {
+    if (bunInView) {
+      setActiveTab('bun');
+    } else if (sauceInView) {
+      setActiveTab('sauce');
+    } else if (mainInView) {
+      setActiveTab('main');
+    }
+  }, [bunInView, mainInView, sauceInView]);
+
+  // клик по табу
+  const handleTabClick = (tab: string) => {
+    setActiveTab(tab as TTabMode);
+
+    if (tab === 'bun') bunHeaderRef.current?.scrollIntoView({ behavior: 'smooth' });
+    if (tab === 'main') mainHeaderRef.current?.scrollIntoView({ behavior: 'smooth' });
+    if (tab === 'sauce') sauceHeaderRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
-
-  return null;
 
   return (
     <BurgerIngredientsUI
-      currentTab={currentTab}
+      currentTab={activeTab}
       buns={buns}
-      mains={mains}
+      mains={fillings}
       sauces={sauces}
-      titleBunRef={titleBunRef}
-      titleMainRef={titleMainRef}
-      titleSaucesRef={titleSaucesRef}
-      bunsRef={bunsRef}
-      mainsRef={mainsRef}
-      saucesRef={saucesRef}
-      onTabClick={onTabClick}
+      titleBunRef={bunHeaderRef}
+      titleMainRef={mainHeaderRef}
+      titleSaucesRef={sauceHeaderRef}
+      bunsRef={bunSectionRef}
+      mainsRef={mainSectionRef}
+      saucesRef={sauceSectionRef}
+      onTabClick={handleTabClick}
     />
   );
 };
