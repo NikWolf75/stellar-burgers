@@ -2,26 +2,24 @@ import { FC } from 'react';
 import { OrderStatusProps } from './type';
 import { OrderStatusUI } from '@ui';
 
-const STATUS_LABELS: Record<string, string> = {
+const statusText: { [key: string]: string } = {
+  pending: 'Готовится',
   done: 'Выполнен',
-  created: 'Создан',
-  pending: 'Готовится'
+  created: 'Создан'
 };
 
 export const OrderStatus: FC<OrderStatusProps> = ({ status }) => {
-  const getColor = () => {
-    switch (status) {
-      case 'done':
-        return '#00CCCC';
-      case 'pending':
-        return '#E52B1A';
-      default:
-        return '#F2F2F3';
-    }
-  };
+  let textStyle = '';
+  switch (status) {
+    case 'pending':
+      textStyle = '#E52B1A';
+      break;
+    case 'done':
+      textStyle = '#00CCCC';
+      break;
+    default:
+      textStyle = '#F2F2F3';
+  }
 
-  const color = getColor();
-  const label = STATUS_LABELS[status] || '';
-
-  return <OrderStatusUI textStyle={color} text={label} />;
+  return <OrderStatusUI textStyle={textStyle} text={statusText[status]} />;
 };

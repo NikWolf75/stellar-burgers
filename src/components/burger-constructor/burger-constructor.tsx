@@ -1,70 +1,64 @@
 import { FC, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
-
 import { TConstructorIngredient } from '@utils-types';
 import { BurgerConstructorUI } from '@ui';
-
-import { useDispatch, useSelector } from '../../services/store';
-
+import { useSelector, useDispatch } from '../../services/store';
 import {
   getItemsConstructor,
   getItemsForOrder
 } from '../../services/slices/ingredientsSlice';
-
 import {
-  orderBurger,
   getOrderRequest,
+  orderBurger,
   getOrderModalData,
   resetOrderModalData
 } from '../../services/slices/orderSlice';
-
+import { useNavigate } from 'react-router-dom';
 import { getUser } from '../../services/slices/userSlice';
 
 export const BurgerConstructor: FC = () => {
-  const navigate = useNavigate();
+  /** TODO: взять переменные constructorItems, orderRequest и orderModalData из стора */
   const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const user = useSelector(getUser);
+  const itemsForOrder = useSelector(getItemsForOrder);
+  const constructorItems = useSelector(getItemsConstructor);
+  const orderModalData = useSelector(getOrderModalData);
+  const orderRequest = useSelector(getOrderRequest);
 
-  const userData = useSelector(getUser);
-  const orderInProgress = useSelector(getOrderRequest);
-  const modalOrderInfo = useSelector(getOrderModalData);
-  const burgerItems = useSelector(getItemsConstructor);
-  const itemsToSend = useSelector(getItemsForOrder);
-
-  const handleOrder = () => {
-    if (orderInProgress || !burgerItems.bun) return;
-
-    if (!userData) {
+  const onOrderClick = () => {
+    if (!constructorItems.bun || orderRequest) return;
+    if (!user) {
       navigate('/login');
       return;
     }
-
-    if (itemsToSend) {
-      dispatch(orderBurger(itemsToSend as string[]));
+    if (itemsForOrder) {
+      dispatch(orderBurger(itemsForOrder as string[]));
     }
   };
 
-  const handleCloseModal = () => {
+  const closeOrderModal = () => {
     dispatch(resetOrderModalData());
     navigate('/feed');
   };
 
-  const totalPrice = useMemo(() => {
-    const bunPrice = burgerItems.bun ? burgerItems.bun.price * 2 : 0;
-    const ingredientsPrice = burgerItems.ingredients.reduce(
-      (acc: number, ing: TConstructorIngredient) => acc + ing.price,
-      0
-    );
-    return bunPrice + ingredientsPrice;
-  }, [burgerItems]);
+  const price = useMemo(
+    () =>
+      (constructorItems.bun ? constructorItems.bun.price * 2 : 0) +
+      constructorItems.ingredients.reduce(
+        (s: number, v: TConstructorIngredient) => s + v.price,
+        0
+      ),
+    [constructorItems]
+  );
 
   return (
     <BurgerConstructorUI
-      price={totalPrice}
-      orderRequest={orderInProgress}
-      constructorItems={burgerItems}
-      orderModalData={modalOrderInfo}
-      onOrderClick={handleOrder}
-      closeOrderModal={handleCloseModal}
+      price={price}
+      orderRequest={orderRequest}
+      constructorItems={constructorItems}
+      orderModalData={orderModalData}
+      onOrderClick={onOrderClick}
+      closeOrderModal={closeOrderModal}
     />
   );
 };

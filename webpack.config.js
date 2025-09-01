@@ -15,9 +15,7 @@ module.exports = {
       {
         test: /\.(ts)x?$/,
         exclude: /node_modules/,
-        use: {
-          loader: 'ts-loader'
-        }
+        use: ['ts-loader']
       },
       {
         test: /\.css$/,
@@ -31,9 +29,7 @@ module.exports = {
           'style-loader',
           {
             loader: 'css-loader',
-            options: {
-              modules: true
-            }
+            options: { modules: true }
           }
         ]
       },
@@ -84,12 +80,12 @@ module.exports = {
   output: {
     path: path.resolve(__dirname, './dist'),
     filename: 'bundle.js',
-    publicPath: './'
+    publicPath: '/' // <- исправлено
   },
   devServer: {
     static: path.join(__dirname, './dist'),
     compress: true,
-    historyApiFallback: true,
+    historyApiFallback: true, // важно для React Router
     port: 4000,
     open: true
   }

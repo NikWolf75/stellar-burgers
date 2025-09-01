@@ -8,20 +8,32 @@ type ProtectedRouteProps = {
   onlyUnAuth?: boolean;
 };
 
-export const ProtectedRoute = ({ onlyUnAuth, children }: ProtectedRouteProps) => {
-  const currentUser = useSelector(getUser);
-  const authChecked = useSelector(getIsAuthChecked);
-  const currentLocation = useLocation();
+export const ProtectedRoute = ({
+  onlyUnAuth,
+  children
+}: ProtectedRouteProps) => {
+  const user = useSelector(getUser);
+  const isAuthChecked = useSelector(getIsAuthChecked);
+  const location = useLocation();
 
-  if (!authChecked) return <Preloader />;
-
-  if (!onlyUnAuth && !currentUser) {
-    return <Navigate replace to="/login" state={{ from: currentLocation }} />;
+  // пока идёт чекаут пользователя , показываем прелоадер
+  if (!isAuthChecked) {
+    return <Preloader />;
   }
 
-  if (onlyUnAuth && currentUser) {
-    const redirectTo = currentLocation.state?.from || { pathname: '/' };
-    return <Navigate replace to={redirectTo} />;
+  //  если маршрут для авторизованного пользователя, но пользователь неавторизован, то делаем редирект
+  // в поле from объекта location.state записываем информацию о URL
+  if (!onlyUnAuth && !user) {
+    return <Navigate replace to='/login' state={{ from: location }} />;
+  }
+
+  // если маршрут для неавторизованного пользователя, но пользователь авторизован
+  // при обратном редиректе  получаем данные о месте назначения редиректа из объекта location.state
+  // в случае если объекта location.state?.from нет — а такое может быть , если мы зашли на страницу логина по прямому URL
+  // мы сами создаём объект c указанием адреса и делаем переадресацию на главную страницу
+  if (onlyUnAuth && user) {
+    const from = location.state?.from || { pathname: '/' };
+    return <Navigate replace to={from} />;
   }
 
   return children;
