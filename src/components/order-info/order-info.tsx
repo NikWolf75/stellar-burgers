@@ -1,40 +1,30 @@
 import { FC, useEffect, useMemo } from 'react';
-import { Preloader } from '../ui/preloader';
-import { OrderInfoUI } from '../ui/order-info';
-import { TIngredient, TOrder } from '@utils-types';
-import { useDispatch, useSelector } from '../../services/store';
+import { OrderInfoUI, Preloader } from '@ui';
+import { TIngredient } from '@utils-types';
 import {
-  getOrderByNumber,
-  getOrderByNumberSelector,
-  getOrderRequest
-} from '../../services/slices/orderSlice';
-import { useLocation } from 'react-router-dom';
-import {
-  fetchIngredients,
-  getIngredients
-} from '../../services/slices/ingredientsSlice';
+  fetchOrderByNumber,
+  selectOrderData,
+  selectOrderRequest
+} from '../../services/slices/order/order';
+import { useDispatch, useSelector } from '../../services/store/store';
+import { selectIngredients } from '../../services/slices/ingredients/ingredients';
+import { useParams } from 'react-router-dom';
 
 export const OrderInfo: FC = () => {
-  /** TODO: взять переменные orderData и ingredients из стора */
+  const { number } = useParams();
+  const orderRequest = useSelector(selectOrderRequest);
+  const orderData = useSelector(selectOrderData);
+  const ingredients = useSelector(selectIngredients);
   const dispatch = useDispatch();
-  const location = useLocation();
-  const orderRequest = useSelector(getOrderRequest);
-  const id = Number(location.pathname.split('/').pop());
-  const orderData = useSelector(getOrderByNumberSelector) as TOrder;
-  const ingredients: TIngredient[] = useSelector(getIngredients) || [];
-  useEffect(() => {
-    dispatch(getOrderByNumber(id));
-  }, [dispatch, id]);
-  useEffect(() => {
-    if (ingredients.length === 0) {
-      dispatch(fetchIngredients());
-    }
-  }, [ingredients]);
 
-  /* Готовим данные для отображения */
+  useEffect(() => {
+    if (number) {
+      dispatch(fetchOrderByNumber(Number(number)));
+    }
+  }, []);
+
   const orderInfo = useMemo(() => {
-    if (!orderData || !ingredients.length || !orderData.ingredients)
-      return null;
+    if (orderRequest || !orderData || !ingredients) return null;
 
     const date = new Date(orderData.createdAt);
 
@@ -72,9 +62,9 @@ export const OrderInfo: FC = () => {
       date,
       total
     };
-  }, [orderData, ingredients]);
+  }, [orderRequest, orderData, ingredients]);
 
-  if (!orderInfo || orderRequest) {
+  if (!orderInfo) {
     return <Preloader />;
   }
 

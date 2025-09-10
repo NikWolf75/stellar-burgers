@@ -1,8 +1,3 @@
-// @ts-nocheck
-/* eslint-disable */
-import '../../index.css';
-import styles from './app.module.css';
-import { Routes, Route, useNavigate, useLocation } from 'react-router-dom';
 import {
   ConstructorPage,
   Feed,
@@ -14,135 +9,120 @@ import {
   Register,
   ResetPassword
 } from '@pages';
-import {
-  ProtectedRoute,
-  AppHeader,
-  Modal,
-  IngredientDetails,
-  OrderInfo
-} from '@components';
+import '../../index.css';
+import styles from './app.module.css';
+import { AppHeader, IngredientDetails, Modal } from '@components';
+import { Route, Routes, useLocation } from 'react-router-dom';
 import { useEffect } from 'react';
-import { checkUserAuth } from '../../services/slices/userSlice';
-import { useDispatch } from '../../services/store';
+import { useDispatch } from '../../services/store/store';
+import { getUser } from '../../services/slices/profile/profile';
+import { RequireAuthorized } from '../route';
+import { fetchIngredients } from '../../services/slices/ingredients/ingredients';
+import { OrderDetailsModal } from '../modal/order-details-modal';
+import { OrderDetails } from '../../pages/order-details';
+import { IngredientDetailsPage } from '../../pages/ingredient-details-page';
+import { RequireUnauthorized } from '../route/require-unauthorized';
 
 const App = () => {
-  const navigate = useNavigate();
-  const dispatch = useDispatch();
   const location = useLocation();
-  const backgroundLocation  = location.state?.background;
+  const background = location.state?.background;
+  const dispatch = useDispatch();
 
   useEffect(() => {
-    dispatch(checkUserAuth());
+    dispatch(getUser());
+    dispatch(fetchIngredients());
   }, [dispatch]);
-  
-  const onCloseHandle = () => {
-    navigate(-1);
-  }
 
   return (
     <div className={styles.app}>
       <AppHeader />
-      <Routes location={backgroundLocation || location}>
-        <Route path='*' element={<NotFound404 />} />
+      <Routes location={background || location}>
         <Route path='/' element={<ConstructorPage />} />
         <Route path='/feed' element={<Feed />} />
         <Route
           path='/login'
           element={
-            <ProtectedRoute onlyUnAuth>
+            <RequireUnauthorized>
               <Login />
-            </ProtectedRoute>
+            </RequireUnauthorized>
           }
         />
         <Route
           path='/register'
           element={
-            <ProtectedRoute onlyUnAuth>
+            <RequireUnauthorized>
               <Register />
-            </ProtectedRoute>
+            </RequireUnauthorized>
           }
         />
         <Route
           path='/forgot-password'
           element={
-            <ProtectedRoute onlyUnAuth>
+            <RequireUnauthorized>
               <ForgotPassword />
-            </ProtectedRoute>
+            </RequireUnauthorized>
           }
         />
         <Route
           path='/reset-password'
           element={
-            <ProtectedRoute onlyUnAuth>
+            <RequireUnauthorized>
               <ResetPassword />
-            </ProtectedRoute>
+            </RequireUnauthorized>
           }
         />
         <Route
           path='/profile'
           element={
-            <ProtectedRoute>
+            <RequireAuthorized>
               <Profile />
-            </ProtectedRoute>
+            </RequireAuthorized>
           }
         />
-        <Route path='/profile/orders'
+        <Route
+          path='/profile/orders'
           element={
-            <ProtectedRoute>
+            <RequireAuthorized>
               <ProfileOrders />
-            </ProtectedRoute>
+            </RequireAuthorized>
           }
         />
         <Route
           path='/profile/orders/:number'
           element={
-            <ProtectedRoute>
-                <OrderInfo />
-            </ProtectedRoute>
+            <RequireAuthorized>
+              <OrderDetails />
+            </RequireAuthorized>
           }
         />
-        <Route
-          path='/ingredients/:id'
-          element={<IngredientDetails />}
-        />
-        <Route
-          path='/feed/:number'
-          element={
-            <OrderInfo />
-          }
-        />
+        <Route path='/ingredients/:id' element={<IngredientDetailsPage />} />
+        <Route path='/feed/:number' element={<OrderDetails />} />
+        <Route path='*' element={<NotFound404 />} />
       </Routes>
-      
-      {backgroundLocation && 
+      {background && (
         <Routes>
           <Route
-          path='/ingredients/:id'
-          element={
-            <Modal title='Детали ингредиента' onClose={onCloseHandle}>
-              <IngredientDetails />
-            </Modal>
-          }
-        />
-        <Route
-          path='/feed/:number'
-          element={
-            <Modal title='' onClose={onCloseHandle}>
-              <OrderInfo />
-            </Modal>
-          }
-        />
-        <Route
-          path='/profile/orders/:number'
-          element={
-            <ProtectedRoute>
-              <Modal title='' onClose={onCloseHandle}>
-                <OrderInfo />
+            path='/ingredients/:id'
+            element={
+              <Modal
+                title='Детали ингредиента'
+                onClose={() => window.history.back()}
+              >
+                <IngredientDetails />
               </Modal>
-            </ProtectedRoute>
-          }
-        />
+            }
+          />
+          <Route path='/feed/:number' element={<OrderDetailsModal />} />
+          <Route
+            path='/profile/orders/:number'
+            element={
+              <RequireAuthorized>
+                <OrderDetailsModal />
+              </RequireAuthorized>
+            }
+          />
         </Routes>
-      }
+      )}
     </div>
   );
 };

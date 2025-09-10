@@ -1,34 +1,29 @@
 import { ProfileUI } from '@ui-pages';
-import { FC, SyntheticEvent, useEffect, useState } from 'react';
-import { Outlet } from 'react-router-dom';
-import { useDispatch, useSelector } from '../../services/store';
-import {
-  getUser,
-  isLoadingUser,
-  updateUser
-} from '../../services/slices/userSlice';
-import { Preloader } from '@ui';
+import React, { FC, SyntheticEvent, useEffect, useState } from 'react';
+import { useSelector, useDispatch } from '../../services/store/store';
+import { selectUser, update } from '../../services/slices/profile/profile';
+import { TRegisterData } from '@api';
 
 export const Profile: FC = () => {
-  /** TODO: взять переменную из стора */
-  const user = useSelector(getUser);
+  const user = useSelector(selectUser);
   const dispatch = useDispatch();
-  const loading = useSelector(isLoadingUser);
+
+  if (!user) {
+    return;
+  }
 
   const [formValue, setFormValue] = useState({
-    name: user?.name || '',
-    email: user?.email || '',
+    name: user.name,
+    email: user.email,
     password: ''
   });
 
   useEffect(() => {
-    if (user) {
-      setFormValue((prevState) => ({
-        ...prevState,
-        name: user?.name || '',
-        email: user?.email || ''
-      }));
-    }
+    setFormValue((prevState) => ({
+      ...prevState,
+      name: user?.name || '',
+      email: user?.email || ''
+    }));
   }, [user]);
 
   const isFormChanged =
@@ -37,15 +32,24 @@ export const Profile: FC = () => {
     !!formValue.password;
 
   const handleSubmit = (e: SyntheticEvent) => {
+    const data: Partial<TRegisterData> = {
+      name: formValue.name,
+      email: formValue.email
+    };
+
+    if (formValue.password) {
+      data.password = formValue.password;
+    }
+
+    dispatch(update(data));
     e.preventDefault();
-    dispatch(updateUser(formValue));
   };
 
   const handleCancel = (e: SyntheticEvent) => {
     e.preventDefault();
     setFormValue({
-      name: user?.name || '',
-      email: user?.email || '',
+      name: user.name,
+      email: user.email,
       password: ''
     });
   };
@@ -57,20 +61,13 @@ export const Profile: FC = () => {
     }));
   };
 
-  if (loading) {
-    return <Preloader />;
-  }
-
   return (
-    <>
-      <ProfileUI
-        formValue={formValue}
-        isFormChanged={isFormChanged}
-        handleCancel={handleCancel}
-        handleSubmit={handleSubmit}
-        handleInputChange={handleInputChange}
-      />
-      <Outlet />
-    </>
+    <ProfileUI
+      formValue={formValue}
+      isFormChanged={isFormChanged}
+      handleCancel={handleCancel}
+      handleSubmit={handleSubmit}
+      handleInputChange={handleInputChange}
+    />
   );
 };
