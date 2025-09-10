@@ -7,9 +7,15 @@ describe('Страница конструктора бургера', () => {
     cy.intercept('POST', '**/orders', { fixture: 'order.json' });
 
     cy.setCookie('accessToken', 'test-access-token');
-    cy.setCookie('refreshToken', 'test-refresh-token');
+    
+    // Сохраняем refreshToken в локальное хранилище
+    cy.window().then((window) => {
+      window.localStorage.setItem('refreshToken', 'test-refresh-token');
+    });
+
     cy.visit('http://localhost:4000/');
   });
+
   // очищаю куки и хранилище от моковых данных после окончания тестов
   afterEach(() => {
     cy.clearCookies();
@@ -84,6 +90,18 @@ describe('Страница конструктора бургера', () => {
     cy.getModal().should('exist');
 
     cy.closeModalByOverlay();
+    cy.getModal().should('not.exist');
+  });
+
+  it('Закрывает модальное окно по нажатию ESC', () => {
+  // Открываем модальное окно, кликая по первому ингредиенту
+    cy.getIngredients().first().click();
+    cy.getModal().should('exist'); // Проверяем, что модалка открыта
+
+  // Эмулируем нажатие клавиши ESC
+    cy.get('body').type('{esc}'); // Используем {esc} для эмуляции нажатия клавиши ESC
+
+  // Проверяем, что модальное окно закрылось
     cy.getModal().should('not.exist');
   });
 

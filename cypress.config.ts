@@ -5,6 +5,8 @@ export default defineConfig({
     setupNodeEvents(on, config) {
       // implement node event listeners here
     },
-    supportFile: 'cypress/support/e2e.js',
+    supportFile: 'cypress/support/e2e.ts',
+    baseUrl: 'http://localhost:4000',
+    specPattern: 'cypress/e2e/**/*.cy.{ts,tsx}',  // Добавьте tsx в паттерн
   },
 });

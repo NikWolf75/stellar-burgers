@@ -43,6 +43,9 @@ describe('ingredientsSlice reducer', () => {
       fetchIngredients.pending('', undefined)
     );
     expect(nextState.isLoading).toBe(true);
+    // Проверяем, что остальные поля не изменились
+    expect(nextState.items).toBeNull();
+    expect(nextState.selectedIngredients).toBeNull();
   });
 
   test('должен обработать fetchIngredients.fulfilled', () => {
@@ -53,6 +56,7 @@ describe('ingredientsSlice reducer', () => {
     );
     expect(nextState.items).toEqual(mockItems);
     expect(nextState.isLoading).toBe(false);
+    expect(nextState.selectedIngredients).toBeNull(); // Проверяем, что selectedIngredients не изменился
   });
 
   test('должен обработать fetchIngredients.rejected', () => {
@@ -61,5 +65,7 @@ describe('ingredientsSlice reducer', () => {
       fetchIngredients.rejected(null, '', undefined, undefined)
     );
     expect(nextState.isLoading).toBe(false);
+    expect(nextState.items).toBeNull();
+    expect(nextState.selectedIngredients).toBeNull(); // Проверяем, что selectedIngredients не изменился
   });
 });
