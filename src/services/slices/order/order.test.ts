@@ -48,7 +48,6 @@ describe('orderSlice reducer', () => {
       initialState,
       fetchOrders.fulfilled(mockOrders, '', undefined)
     );
-
     expect(nextState.orders).toEqual(mockOrders);
     expect(nextState.orderRequest).toBe(false);
   });
@@ -74,7 +73,6 @@ describe('orderSlice reducer', () => {
       initialState,
       fetchOrderByNumber.fulfilled(mockOrder, '', 1)
     );
-
     expect(nextState.orderData).toEqual(mockOrder);
     expect(nextState.orderRequest).toBe(false);
   });
@@ -100,7 +98,6 @@ describe('orderSlice reducer', () => {
       initialState,
       placeOrder.fulfilled(mockOrder, '', [])
     );
-
     expect(nextState.placedOrderData).toEqual(mockOrder);
     expect(nextState.orderRequest).toBe(false);
   });

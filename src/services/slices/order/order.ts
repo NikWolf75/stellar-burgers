@@ -2,7 +2,7 @@ import { TOrder } from '@utils-types';
 import { getOrderByNumberApi, getOrdersApi, orderBurgerApi } from '@api';
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 
-type TOrderState = {
+export type TOrderState = {
   orders: TOrder[];
   orderData: TOrder | null;
   placedOrderData: TOrder | null;
@@ -17,7 +17,6 @@ export const initialState: TOrderState = {
 };
 
 export const fetchOrders = createAsyncThunk('orders/fetchOrders', getOrdersApi);
-
 export const fetchOrderByNumber = createAsyncThunk(
   'orders/fetchOrderByNumber',
   async (orderNumber: number) => {
@@ -25,7 +24,6 @@ export const fetchOrderByNumber = createAsyncThunk(
     return response.orders[0];
   }
 );
-
 export const placeOrder = createAsyncThunk(
   'order/placeOrder',
   async (ingredientIds: string[]) => {
@@ -43,10 +41,10 @@ const orderSlice = createSlice({
     }
   },
   selectors: {
-    selectOrders: (state) => state.orders,
-    selectOrderData: (state) => state.orderData,
-    selectPlacedOrderData: (state) => state.placedOrderData,
-    selectOrderRequest: (state) => state.orderRequest
+    selectOrders: (state: TOrderState) => state.orders,
+    selectOrderData: (state: TOrderState) => state.orderData,
+    selectPlacedOrderData: (state: TOrderState) => state.placedOrderData,
+    selectOrderRequest: (state: TOrderState) => state.orderRequest
   },
   extraReducers: (builder) => {
     builder
@@ -84,7 +82,6 @@ const orderSlice = createSlice({
 });
 
 export const { clearPlacedOrderData } = orderSlice.actions;
-
 export const {
   selectOrders,
   selectOrderData,

@@ -1,6 +1,10 @@
-import { describe, expect, test } from '@jest/globals';
-import profileSlice, { getUser, logout, update } from './profile';
-import { initialState } from './profile';
+import { describe, expect, test, beforeEach } from '@jest/globals';
+import profileReducer, {
+  getUser,
+  logout,
+  update,
+  initialState
+} from './profile';
 import { login } from '../login/login';
 import { register } from '../register/register';
 
@@ -20,15 +24,8 @@ describe('profileSlice reducer', () => {
     }
   });
 
-  const mockUser = {
-    email: '',
-    name: ''
-  };
-
-  const loginData = {
-    email: '',
-    password: ''
-  };
+  const mockUser = { email: '', name: '', password: '' };
+  const loginData = { email: '', password: '' };
 
   const mockUserResponse = {
     success: true,
@@ -39,56 +36,50 @@ describe('profileSlice reducer', () => {
     success: true,
     user: {
       email: 'test@example.com',
-      name: 'Test User'
+      name: 'Test User',
+      password: 'testpassword' // Добавляем поле password для совместимости с типом TUser
     },
     accessToken: 'access-token',
     refreshToken: 'refresh-token'
   };
 
-  const registerData = {
-    email: '',
-    name: '',
-    password: ''
-  };
+  const registerData = { email: '', name: '', password: '' };
 
-  test('должен обработать getUser.pending', () => {
-    const nextState = profileSlice.reducer(
+  test('should handle getUser.pending', () => {
+    const nextState = profileReducer(
       initialState,
       getUser.pending('', undefined)
     );
     expect(nextState.isLoading).toBe(true);
   });
 
-  test('должен обработать getUser.fulfilled', () => {
-    const nextState = profileSlice.reducer(
+  test('should handle getUser.fulfilled', () => {
+    const nextState = profileReducer(
       initialState,
       getUser.fulfilled(mockUserResponse, '', undefined)
     );
-
     expect(nextState.user).toEqual(mockUser);
     expect(nextState.isLoading).toBe(false);
   });
 
-  test('должен обработать getUser.rejected', () => {
-    const nextState = profileSlice.reducer(
+  test('should handle getUser.rejected', () => {
+    const nextState = profileReducer(
       initialState,
       getUser.rejected(null, '', undefined, 'Ошибка загрузки')
     );
     expect(nextState.isLoading).toBe(false);
   });
 
-  // register
-
-  test('должен обработать register.pending', () => {
-    const nextState = profileSlice.reducer(
+  test('should handle register.pending', () => {
+    const nextState = profileReducer(
       initialState,
       register.pending('', registerData)
     );
     expect(nextState.isLoading).toBe(true);
   });
 
-  test('должен обработать register.fulfilled', () => {
-    const nextState = profileSlice.reducer(
+  test('should handle register.fulfilled', () => {
+    const nextState = profileReducer(
       initialState,
       register.fulfilled(mockUserData, '', registerData)
     );
@@ -96,58 +87,50 @@ describe('profileSlice reducer', () => {
     expect(nextState.isLoading).toBe(false);
   });
 
-  test('должен обработать register.rejected', () => {
-    const nextState = profileSlice.reducer(
+  test('should handle register.rejected', () => {
+    const nextState = profileReducer(
       initialState,
       register.rejected(null, '', registerData, 'Ошибка загрузки')
     );
     expect(nextState.isLoading).toBe(false);
   });
 
-  // logout
-
-  test('должен обработать logout.pending', () => {
-    const nextState = profileSlice.reducer(
+  test('should handle logout.pending', () => {
+    const nextState = profileReducer(
       initialState,
       logout.pending('', undefined)
     );
     expect(nextState.isLoading).toBe(true);
   });
 
-  test('должен обработать logout.fulfilled', () => {
-    let userState = {
-      isLoading: true,
-      user: mockUser
-    };
-
-    const nextState = profileSlice.reducer(
+  test('should handle logout.fulfilled', () => {
+    const userState = { isLoading: true, user: mockUser };
+    const nextState = profileReducer(
       userState,
       logout.fulfilled(mockUserResponse, '', undefined)
     );
-
     expect(nextState.user).toEqual(null);
     expect(nextState.isLoading).toBe(false);
   });
 
-  test('должен обработать logout.rejected', () => {
-    const nextState = profileSlice.reducer(
+  test('should handle logout.rejected', () => {
+    const nextState = profileReducer(
       initialState,
       logout.rejected(null, '', undefined, 'Ошибка загрузки')
     );
     expect(nextState.isLoading).toBe(false);
   });
 
-  // login
-  test('должен обработать login.pending', () => {
-    const nextState = profileSlice.reducer(
+  test('should handle login.pending', () => {
+    const nextState = profileReducer(
       initialState,
       login.pending('', loginData, undefined)
     );
     expect(nextState.isLoading).toBe(true);
   });
 
-  test('должен обработать login.fulfilled', () => {
-    const nextState = profileSlice.reducer(
+  test('should handle login.fulfilled', () => {
+    const nextState = profileReducer(
       initialState,
       login.fulfilled(mockUserData, '', loginData)
     );
@@ -155,26 +138,24 @@ describe('profileSlice reducer', () => {
     expect(nextState.isLoading).toBe(false);
   });
 
-  test('должен обработать login.rejected', () => {
-    const nextState = profileSlice.reducer(
+  test('should handle login.rejected', () => {
+    const nextState = profileReducer(
       initialState,
       login.rejected(null, '', loginData, 'Ошибка загрузки')
     );
     expect(nextState.isLoading).toBe(false);
   });
 
-  // update
-
-  test('должен обработать update.pending', () => {
-    const nextState = profileSlice.reducer(
+  test('should handle update.pending', () => {
+    const nextState = profileReducer(
       initialState,
       update.pending('', loginData, undefined)
     );
     expect(nextState.isLoading).toBe(true);
   });
 
-  test('должен обработать update.fulfilled', () => {
-    const nextState = profileSlice.reducer(
+  test('should handle update.fulfilled', () => {
+    const nextState = profileReducer(
       initialState,
       update.fulfilled(mockUserData, '', loginData)
     );
@@ -182,8 +163,8 @@ describe('profileSlice reducer', () => {
     expect(nextState.isLoading).toBe(false);
   });
 
-  test('должен обработать update.rejected', () => {
-    const nextState = profileSlice.reducer(
+  test('should handle update.rejected', () => {
+    const nextState = profileReducer(
       initialState,
       update.rejected(null, '', loginData, 'Ошибка загрузки')
     );

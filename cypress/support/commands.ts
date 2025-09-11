@@ -35,15 +35,33 @@
 //     }
 //   }
 // }
-Cypress.Commands.add('getIngredients', () =>
-  cy.get('[data-cy="ingredient-item"]')
+
+// Кастомные команды для взаимодействия с ингредиентами и модальными окнами
+
+/// <reference types="cypress" />
+
+/// <reference types="cypress" />
+
+Cypress.Commands.add(
+  'getIngredients',
+  (): Cypress.Chainable<JQuery<HTMLElement>> => {
+    return cy.get('[data-cy="ingredient-item"]');
+  }
 );
 
-Cypress.Commands.add('getModal', () => cy.get('[data-cy="modal"]'));
-
-Cypress.Commands.add('openIngredientModalByName', (name) => {
-  cy.contains(name).click();
+Cypress.Commands.add('getModal', (): Cypress.Chainable<JQuery<HTMLElement>> => {
+  return cy.get('[data-cy="modal"]');
 });
+
+Cypress.Commands.add(
+  'openIngredientModalByName',
+  (name: string): Cypress.Chainable<JQuery<HTMLElement>> => {
+    return cy
+      .contains(name)
+      .click()
+      .then(() => cy.get('[data-cy="modal"]'));
+  }
+);
 
 Cypress.Commands.add('closeModalByButton', () => {
   cy.get('[data-cy="modal-close-button"]').click();

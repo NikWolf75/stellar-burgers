@@ -1,5 +1,5 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
-import { getUserApi, logoutApi, TRegisterData, updateUserApi } from '@api';
+import { getUserApi, logoutApi, updateUserApi } from '@api';
 import { TUser } from '@utils-types';
 import { deleteCookie, setCookie } from '../../../utils/cookie';
 import { login } from '../login/login';
@@ -9,25 +9,20 @@ type TProfileState = {
   isLoading: boolean;
   user: TUser | null;
 };
+
 export const initialState: TProfileState = {
   isLoading: true,
   user: null
 };
 
 export const getUser = createAsyncThunk('profile/user', getUserApi);
-
 export const logout = createAsyncThunk('profile/logout', logoutApi);
-
 export const update = createAsyncThunk('profile/update', updateUserApi);
 
 const profileSlice = createSlice({
   name: 'profile',
   initialState,
   reducers: {},
-  selectors: {
-    selectUser: (sliceState) => sliceState.user,
-    selectIsLoading: (sliceState) => sliceState.isLoading
-  },
   extraReducers: (builder) => {
     builder
       .addCase(getUser.pending, (state) => {
@@ -40,11 +35,10 @@ const profileSlice = createSlice({
       .addCase(getUser.rejected, (state) => {
         state.isLoading = false;
       })
-
       .addCase(logout.pending, (state) => {
         state.isLoading = true;
       })
-      .addCase(logout.fulfilled, (state, action) => {
+      .addCase(logout.fulfilled, (state) => {
         state.user = null;
         localStorage.removeItem('refreshToken');
         deleteCookie('accessToken');
@@ -53,7 +47,6 @@ const profileSlice = createSlice({
       .addCase(logout.rejected, (state) => {
         state.isLoading = false;
       })
-
       .addCase(update.pending, (state) => {
         state.isLoading = true;
       })
@@ -64,7 +57,6 @@ const profileSlice = createSlice({
       .addCase(update.rejected, (state) => {
         state.isLoading = false;
       })
-
       .addCase(login.pending, (state) => {
         state.isLoading = true;
       })
@@ -77,7 +69,6 @@ const profileSlice = createSlice({
       .addCase(login.rejected, (state) => {
         state.isLoading = false;
       })
-
       .addCase(register.pending, (state) => {
         state.isLoading = true;
       })
@@ -92,6 +83,10 @@ const profileSlice = createSlice({
       });
   }
 });
-export const { selectUser, selectIsLoading } = profileSlice.selectors;
 
-export default profileSlice;
+export const selectUser = (state: { profile: TProfileState }) =>
+  state.profile.user;
+export const selectIsLoading = (state: { profile: TProfileState }) =>
+  state.profile.isLoading;
+
+export default profileSlice.reducer;

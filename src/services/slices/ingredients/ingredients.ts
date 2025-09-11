@@ -3,12 +3,13 @@ import { TIngredient } from '@utils-types';
 import { getIngredientsApi } from '@api';
 
 type TIngredientsState = {
-  items?: TIngredient[];
+  items: TIngredient[] | null;
   isLoading: boolean;
   selectedIngredients: TIngredient | null;
 };
+
 export const initialState: TIngredientsState = {
-  items: undefined,
+  items: null,
   isLoading: false,
   selectedIngredients: null
 };
@@ -39,6 +40,7 @@ const ingredientsSlice = createSlice({
       });
   }
 });
+
 export const { selectIngredients } = ingredientsSlice.selectors;
 
 export default ingredientsSlice;

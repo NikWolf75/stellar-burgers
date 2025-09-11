@@ -3,21 +3,22 @@ import { LoginUI } from '@ui-pages';
 import { useSelector, useDispatch } from '../../services/store/store';
 import { selectIsLoading } from '../../services/slices/profile/profile';
 import { Preloader } from '@ui';
-import loginSlice, { login } from '../../services/slices/login/login';
+import loginSlice, {
+  login,
+  selectUser,
+  selectIsError
+} from '../../services/slices/login/login'; // Экспортируем селекторы из login
 
 export const Login: FC = () => {
-  const isLoading = useSelector(selectIsLoading);
+  const isLoading = useSelector(selectIsLoading); // Вызываем селектор из profile
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const dispatch = useDispatch();
-  const isError = useSelector(loginSlice.selectors.selectIsError);
+  const isError = useSelector(selectIsError); // Используем селектор, который экспортирован из loginSlice
 
   const handleSubmit = (e: SyntheticEvent) => {
-    let loginData = {
-      email: email,
-      password: password
-    };
-    dispatch(login(loginData));
+    const loginData = { email, password };
+    dispatch(login(loginData)); // Отправляем login
     e.preventDefault();
   };
 

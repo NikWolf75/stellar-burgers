@@ -1,14 +1,8 @@
 import { describe, expect, test } from '@jest/globals';
+import registerSlice, { register, initialState } from './register';
 
-import registerSlice, { register } from './register';
-import { initialState } from './register';
-
-describe('profileSlice reducer', () => {
-  const registerData = {
-    email: '',
-    name: '',
-    password: ''
-  };
+describe('registerSlice reducer', () => {
+  const registerData = { email: '', name: '', password: '' };
 
   test('должен обработать registerSlice.pending', () => {
     const nextState = registerSlice.reducer(
@@ -16,6 +10,7 @@ describe('profileSlice reducer', () => {
       register.pending('', registerData)
     );
     expect(nextState.isError).toBe(false);
+    expect(nextState.isLoading).toBe(true);
   });
 
   test('должен обработать registerSlice.rejected', () => {
@@ -24,5 +19,21 @@ describe('profileSlice reducer', () => {
       register.rejected(null, '', registerData, 'Ошибка загрузки')
     );
     expect(nextState.isError).toBe(true);
+    expect(nextState.isLoading).toBe(false);
+  });
+
+  test('должен обработать registerSlice.fulfilled', () => {
+    const mockResponse = {
+      success: true,
+      accessToken: 'mockAccessToken',
+      refreshToken: 'mockRefreshToken',
+      user: { name: 'Test', email: 'test@mail.com' }
+    };
+    const nextState = registerSlice.reducer(
+      initialState,
+      register.fulfilled(mockResponse, '', registerData)
+    );
+    expect(nextState.user).toEqual(mockResponse.user);
+    expect(nextState.isLoading).toBe(false);
   });
 });
