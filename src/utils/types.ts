@@ -32,9 +32,19 @@ export type TOrdersData = {
   totalToday: number;
 };
 
+// src/services/types/index.ts
 export type TUser = {
-  email: string;
   name: string;
+  email: string;
+  password?: string; // <- сделал необязательным
+};
+
+// Ответ от сервера при логине
+export type TAuthResponse = {
+  success: boolean;
+  refreshToken: string;
+  accessToken: string;
+  user: TUser;
 };
 
 export type TTabMode = 'bun' | 'sauce' | 'main';
